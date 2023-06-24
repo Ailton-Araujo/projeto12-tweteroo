@@ -50,7 +50,15 @@ app.get("/tweets", (req, res) => {
   const start = Math.max(end - 10, 0);
 
   console.log(start, end);
-  res.send(tweets.slice(start, end));
+  res.send(
+    tweets
+      .slice(start, end)
+      .map((element) => ({
+        username: element.username,
+        avatar: users.find((user) => user.username === element.username).avatar,
+        tweet: element.tweet,
+      }))
+  );
 });
 
 app.get("/tweets/:USERNAME", (req, res) => {
