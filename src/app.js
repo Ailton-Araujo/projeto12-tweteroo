@@ -1,7 +1,5 @@
 import express, { json } from "express";
 import cors from "cors";
-import { start } from "repl";
-import { test } from "node:test";
 
 const users = [];
 const tweets = [];
@@ -25,18 +23,13 @@ app.post("/sign-up", (req, res) => {
 });
 
 app.post("/tweets", (req, res) => {
-  const name = req.headers.user;
-  const { username, tweet } = req.body;
+  const username = req.headers.user;
+  const { tweet } = req.body;
 
-  if (!users.find((user) => user.username === name)) {
+  if (!users.find((user) => user.username === username)) {
     return res.status(401).send("UNAUTHORIZED");
   }
-  if (
-    !username ||
-    !tweet ||
-    typeof username !== "string" ||
-    typeof tweet !== "string"
-  ) {
+  if (!tweet || typeof tweet !== "string") {
     return res.status(400).send("Todos os campos são obrigatórios!");
   }
   tweets.push({ username, tweet });
