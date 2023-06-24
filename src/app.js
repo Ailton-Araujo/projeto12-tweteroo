@@ -1,5 +1,7 @@
 import express, { json } from "express";
 import cors from "cors";
+import { start } from "repl";
+import { test } from "node:test";
 
 const users = [];
 const tweets = [];
@@ -23,10 +25,10 @@ app.post("/sign-up", (req, res) => {
 });
 
 app.post("/tweets", (req, res) => {
-  const { user } = req.headers;
-  const { username } = user;
-  const { tweet } = req.body;
-  if (!users.find((user) => user.username === username)) {
+  const name = req.headers.user;
+  const { username, tweet } = req.body;
+
+  if (!users.find((user) => user.username === name)) {
     return res.status(401).send("UNAUTHORIZED");
   }
   if (
@@ -38,7 +40,41 @@ app.post("/tweets", (req, res) => {
     return res.status(400).send("Todos os campos são obrigatórios!");
   }
   tweets.push({ username, tweet });
-  return res.status(201).send("Ok");
+  res.status(201).send("Ok");
+});
+
+app.get("/tweets", (req, res) => {
+  let page = req.query.page;
+  if (page !== undefined) {
+    if (Number(page) < 1 || isNaN(page)) {
+      res.status(400).send("Informe uma página válida!");
+    }
+  } else {
+    page = 1;
+  }
+
+  const end = Math.max(tweets.length - (page - 1) * 10, 0);
+  const start = Math.max(end - 10, 0);
+
+  console.log(start, end);
+  res.send(tweets.slice(start, end));
+});
+
+app.get("/tweets/:USERNAME", (req, res) => {
+  const name = req.params.USERNAME;
+  const user = users.find((user) => user.username === name);
+  if (!user) {
+    return res.send([]);
+  }
+  res.send(
+    tweets
+      .filter((element) => element.username === user.username)
+      .map((element) => ({
+        username: element.username,
+        avatar: user.avatar,
+        tweet: element.tweet,
+      }))
+  );
 });
 
 const PORT = 5000;
